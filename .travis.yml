@@ -7,6 +7,7 @@ branches:
 
 install:
   - sudo pip install tox
+
 python:
   - "3.5"
 
