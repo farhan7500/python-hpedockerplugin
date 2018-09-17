@@ -17,4 +17,4 @@ matrix:
 
 # command to run tests
 script:
-  - sudo tox -e py35 --  test.test_hpe_plugin_v2
+  - sudo tox -e py27 --  test.test_hpe_plugin_v2
