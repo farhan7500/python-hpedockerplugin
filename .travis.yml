@@ -1,0 +1,10 @@
+dist: xenial
+sudo: true
+language: generic
+branches:
+  only:
+    - plugin_v2
+
+# command to run tests
+script:
+  - sudo tox -e py35 --  test.test_hpe_plugin_v2
