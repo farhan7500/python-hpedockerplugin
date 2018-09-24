@@ -1,9 +1,20 @@
 dist: xenial
 sudo: false
-language: python
+language: generic
+branches:
+  only:
+    - plugin_v2
+
+install:
+  - sudo pip install tox
 python:
-- "2.7"
-- "3.4"
-install: pip install tox-travis
+  - "2.7"
+
+matrix:
+  include:
+  - python: "2.7"
+    env: TOXENV=py27
+
+# command to run tests
 script:
-  - tox --  test.test_hpe_plugin_v2
+  - tox -e py27 --  test.test_hpe_plugin_v2
