@@ -18,4 +18,4 @@ matrix:
 
 # command to run tests
 script:
-  - tox --  test.test_hpe_plugin_v2
+  - tox --  test.test_hpe_plugin_v2 
