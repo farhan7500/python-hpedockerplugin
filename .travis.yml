@@ -1,4 +1,4 @@
-dist: xenial
+dist: trusty
 sudo: true
 language: generic
 branches:
@@ -7,15 +7,14 @@ branches:
 
 install:
   - sudo pip install tox
-  
+python:
+  - "3.5"
+
 matrix:
   include:
- 	- python: "2,7"
- 	env: TOXENV=py27
+  - python: "3.5"
+    env: TOXENV=py35
 
 # command to run tests
 script:
   - tox -e py27 --  test.test_hpe_plugin_v2
-  
-
-
