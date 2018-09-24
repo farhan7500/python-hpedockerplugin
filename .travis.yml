@@ -9,16 +9,12 @@ install:
   - sudo pip install tox
 python:
   - "2.7"
-  - "3.4"
 
 matrix:
   include:
   - python: "2.7"
     env: TOXENV=py27
-  - python: "3.4"
-   env: TOXENV=py34
 
 # command to run tests
 script:
   - tox -e py27 --  test.test_hpe_plugin_v2
-  - tox -e py34 --  test.test_hpe_plugin_v2
