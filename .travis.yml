@@ -6,5 +6,5 @@ python:
 - "3.4"
 install: pip install tox-travis
 script:
-  - tox -e py27 --  test.test_hpe_plugin_v2
-  - tox -e py34 --  test.test_hpe_plugin_v2
+  - tox --  test.test_hpe_plugin_v2
+  - tox --  test.test_hpe_plugin_v2
