@@ -7,7 +7,6 @@ branches:
 
 install:
   - sudo pip install tox
-
 python:
   - "2.7"
 
@@ -18,4 +17,4 @@ matrix:
 
 # command to run tests
 script:
-  - tox --  test.test_hpe_plugin_v2 
+  - tox -e py27 --  test.test_hpe_plugin_v2
