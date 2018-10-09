@@ -8,4 +8,4 @@ install:
 
 script: 
   #- tox --  test.test_hpe_plugin_v2
-  - tox -e cover
+  - tox -e cover test.test_hpe_plugin_v2
