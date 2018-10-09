@@ -1,3 +1,4 @@
 flake8
 testtools
 mock==2.0.0
+coverage
