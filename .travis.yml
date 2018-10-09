@@ -8,4 +8,4 @@ install:
 
 script: 
   - tox --  test.test_hpe_plugin_v2
-  - coverage run --source=hpedockerplugin -m unittest discover -s test
+  - tox cover test.test_hpe_plugin_v2
