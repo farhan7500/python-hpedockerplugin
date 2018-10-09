@@ -7,5 +7,4 @@ install:
   - sudo pip install tox-travis
 
 script: 
-  #- tox --  test.test_hpe_plugin_v2
-  - tox -e py34 -e cover test.test_hpe_plugin_v2
+  - tox --  test.test_hpe_plugin_v2
