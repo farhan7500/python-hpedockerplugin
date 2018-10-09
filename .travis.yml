@@ -5,8 +5,8 @@ python:
     - "3.4"
 install: 
   - sudo pip install tox-travis
-  - sudo pip install requirements.txt
-  - sudo pip install test-requirements.txt
+  - sudo pip install -r requirements.txt
+  - sudo pip install -r test-requirements.txt
   - sudo pip install coverage
 script: 
   - tox --  test.test_hpe_plugin_v2
