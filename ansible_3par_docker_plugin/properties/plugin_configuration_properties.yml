@@ -22,6 +22,15 @@ INVENTORY:
     #hpe3par_iscsi_chap_enabled: True
     #use_multipath: False
     #enforce_multipath: False
+    backend_id: CSSOS-SSA04
+    replication_device:
+      backend_id: CSSOS-SSA05
+      replication_mode: synchronous
+      cpg_map: "SHASHI-PRIM:SHASHI-SEC"
+      snap_cpg_map: "SHASHI-PRIM-SNAP:SHASHI-SEC-SNAP"
+      hpe3par_ip: 192.168.67.5
+      hpe3par_username: 3paradm
+      hpe3par_password: 3pardata
 
   3PAR1:
     # Set of mandatory properties
@@ -43,4 +52,13 @@ INVENTORY:
     #use_multipath: False
     #enforce_multipath: False
     #ssh_hosts_key_file: '/root/.ssh/known_hosts'
+    #backend_id: CSSOS-SSA10
+    #replication_device:
+    #  backend_id: CSSOS-SSA12
+    #  replication_mode: asynchronous
+    #  cpg_map: "SHASHI-PRIM15:SHASHI-SEC15"
+    #  snap_cpg_map: "SHASHI-PRIM-SNAP15:SHASHI-SEC-SNAP15"
+    #  hpe3par_ip: 192.168.67.50
+    #  hpe3par_username: 3paradm123
+    #  hpe3par_password: 3pardata123
 
