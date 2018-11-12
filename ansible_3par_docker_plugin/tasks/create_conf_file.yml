@@ -72,7 +72,7 @@
       - "{{ ports.results }}"
     become: yes
 
-  - name: Get the password
+  - name: Get the encrypted passwords
     shell: hpe3parencryptor --backend {{ item[0] }} -a {{INVENTORY[item[0]]['encryptor_key']}} "{{ INVENTORY[item[0]][(item[1].value)] }}"
     ignore_errors: yes
     register: passwords
@@ -122,40 +122,65 @@
     local_action: shell /usr/bin/sshpass -p {{ INVENTORY[item]['replication_device']['hpe3par_password'] }} ssh -oStrictHostKeyChecking=no {{ INVENTORY[item]['replication_device']['hpe3par_username'] }}@{{ INVENTORY[item]['replication_device']['hpe3par_ip'] }} "showport -iscsi" | grep ready | awk '{print $3}'
     with_items: "{{ INVENTORY.keys() }}"
     register: replication_ports
-
-  - name: Display the replication_ports
+    
+  - name: Get the encrypted passwords for replication device
+    shell: hpe3parencryptor --backend {{ item[0] }} -a {{INVENTORY[item[0]]['encryptor_key']}} "{{ INVENTORY[item[0]]['replication_device'][(item[1].value)] }}"
+    ignore_errors: yes
+    register: replication_device_passwords
+    with_nested:
+      - "{{ INVENTORY.keys()}}"
+      - [{ option: 'hpe3par_password', value: 'hpe3par_password' }, { option: 'san_password', value: 'hpe3par_password' }]
+    when: INVENTORY[item[0]]['encryptor_key'] is defined
+    
+  - name: Display the replication_device_passwords
     debug:
-      msg: "{{ replication_ports }}"
+      msg: "{{ replication_device_passwords }}"
 
-  - name: set the replication device information
+  - name: Set the replication device information
     set_fact:
       backend_id: "backend_id:{{ INVENTORY[item]['replication_device']['backend_id'] }}"
       replication_mode: "replication_mode:{{ INVENTORY[item]['replication_device']['replication_mode'] }}"
       cpg_map: "cpg_map:{{ INVENTORY[item]['replication_device']['cpg_map'] }}"
       snap_cpg_map: "snap_cpg_map:{{ INVENTORY[item]['replication_device']['snap_cpg_map'] }}"
       hpe3par_username: "hpe3par_username:{{ INVENTORY[item]['replication_device']['hpe3par_username'] }}"
-      hpe3par_password: "hpe3par_password:{{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
+      #hpe3par_password: "hpe3par_password:{{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
       hpe3par_api_url: "hpe3par_api_url: https://{{ INVENTORY[item]['replication_device']['hpe3par_ip'] }}:8080/api/v1"
       san_ip: "san_ip: {{ INVENTORY[item]['replication_device']['hpe3par_ip'] }}"
       san_login: "san_login: {{ INVENTORY[item]['replication_device']['hpe3par_username'] }}"
-      san_password: "san_password: {{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
-      hpe3par_iscsi_ips: "hpe3par_iscsi_ips: {{ ','.join(replication_ports['results'][0]['stdout_lines']) }}"
+      #san_password: "san_password: {{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
+      hpe3par_iscsi_ips: "hpe3par_iscsi_ips: {{ ';'.join(replication_ports['results'][0]['stdout_lines']) }}"
     with_items: "{{ INVENTORY.keys() }}"
     register: replication_device
     when: INVENTORY[item]['replication_device'] is defined
+    
+  - name: Set the passwords for replication device (non-encrypted passwords)
+    set_fact:
+      hpe3par_password: "hpe3par_password:{{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
+      san_password: "san_password: {{ INVENTORY[item]['replication_device']['hpe3par_password'] }}"
+    with_items: "{{ INVENTORY.keys() }}"
+    register: replication_device_final_passwords
+    when: INVENTORY[item]['replication_device'] is defined and INVENTORY[item]['encryptor_key'] is not defined
+    
+  - name: Set the passwords for replication device (encrypted passwords)
+    set_fact:
+      hpe3par_password: "hpe3par_password:{{ replication_device_passwords['results'][0]['stdout'].split('password: ')[1] }}"
+      san_password: "san_password: {{ replication_device_passwords['results'][0]['stdout'].split('password: ')[1] }}"
+    with_items: "{{ INVENTORY.keys() }}"
+    register: replication_device_final_passwords
+    when: INVENTORY[item]['replication_device'] is defined and INVENTORY[item]['encryptor_key'] is defined
 
-  - name: Display the backend IDs
+  - name: Display the passwords repli
     debug:
-      msg: "{{ replication_device['results'] }}"
+      msg: "{{ replication_device_final_passwords }}"
 
-
-  - name: populate the replication device information
+  - name: Populate the replication device information
     ini_file:
       path: /etc/hpedockerplugin/hpe.conf
       section: "{{ replication_device['results'][item | int]['item'] }}"
       option: replication_device
-      value: "{{ replication_device['results'][item | int]['ansible_facts']['backend_id'] }},{{ replication_device['results'][item | int]['ansible_facts']['replication_mode'] }},{{ replication_device['results'][item | int]['ansible_facts']['cpg_map'] }},{{ replication_device['results'][item | int]['ansible_facts']['snap_cpg_map'] }},{{ replication_device['results'][item | int]['ansible_facts']['hpe3par_username'] }},{{ replication_device['results'][item | int]['ansible_facts']['hpe3par_password'] }},{{ replication_device['results'][item | int]['ansible_facts']['hpe3par_api_url'] }},{{ replication_device['results'][item | int]['ansible_facts']['san_ip'] }},{{ replication_device['results'][item | int]['ansible_facts']['san_login'] }},{{ replication_device['results'][item | int]['ansible_facts']['san_password'] }}, {{ replication_device['results'][item | int]['ansible_facts']['hpe3par_iscsi_ips'] }}"
+      value: "{{ replication_device['results'][item | int]['ansible_facts']['backend_id'] }},{{ replication_device['results'][item | int]['ansible_facts']['replication_mode'] }},{{ replication_device['results'][item | int]['ansible_facts']['cpg_map'] }},{{ replication_device['results'][item | int]['ansible_facts']['snap_cpg_map'] }},{{ replication_device['results'][item | int]['ansible_facts']['hpe3par_username'] }},{{ replication_device_final_passwords['results'][item | int]['ansible_facts']['hpe3par_password'] }},{{ replication_device['results'][item | int]['ansible_facts']['hpe3par_api_url'] }},{{ replication_device['results'][item | int]['ansible_facts']['san_ip'] }},{{ replication_device['results'][item | int]['ansible_facts']['san_login'] }},{{ replication_device_final_passwords['results'][item | int]['ansible_facts']['san_password'] }}, {{ replication_device['results'][item | int]['ansible_facts']['hpe3par_iscsi_ips'] }}"
       no_extra_spaces: true
     with_items: "{{ lookup('sequence', 'start=0 end='+((replication_device['results'] | length)-1) |string, wantlist=True) }}"
     when: INVENTORY[replication_device['results'][item | int]['item']]['replication_device'] is defined
+
 
